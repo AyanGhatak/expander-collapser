@@ -1,10 +1,9 @@
 'use strict';
 module.exports = function (dep) {
   /**
-   * Class representing the DateRange.
+   * Class representing the DateRange
    */
   class DateRange {
-
     constructor() {
       /**
       * @private
