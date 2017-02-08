@@ -1,6 +1,6 @@
 # Expander-collapser Extension
 ## A FusionTime Series Extension
-This extension mainly draws buttons using [d3-form-components](https://github.com/ranajitbanerjee/d3-form-components)
+This extension mainly draws buttons using [d3-form-components](https://github.com/ranajitbanerjee/d3-form-components), adds or new buttons on interactions.
 <script src='https://www.fusioncharts.com/startup-bridge/assets/fusioncharts.js' charset='utf-8'></script>
 <script src='https://www.fusioncharts.com/startup-bridge/assets/fusioncharts.timeseries.js' charset='utf-8'></script>
 <script src='../dist/expander-collapser-es5.js' charset='utf-8'></script>
