@@ -1,6 +1,5 @@
 'use strict';
-const DateRange = require('./fcts-ext-daterange'),
-  Calendar = require('../fc-calendar-es5');
+const DateRange = require('./fcts-ext-expandercollapser');
 ;(function (env, factory) {
   if (typeof module === 'object' && module.exports) {
     module.exports = env.document
@@ -16,11 +15,11 @@ const DateRange = require('./fcts-ext-daterange'),
 })(typeof window !== 'undefined' ? window : this, function (_window, windowExists) {
   var FC = _window.FusionCharts,
     FusionCalendar = _window.FusionCalendar;
-  FC.register('extension', ['private', 'date-range-chooser', function () {
+  FC.register('extension', ['private', 'expander-collapser', function () {
     var DateTimeFormatter = this.hcLib.DateTimeFormatter;
-    FC.registerComponent('extensions', 'date-range-chooser', DateRange({FusionCharts: FC,
-      DateTimeFormatter: DateTimeFormatter,
-      FusionCalendar: FusionCalendar
+    FC.registerComponent('extensions', 'expander-collapser', DateRange({
+      FusionCharts: FC,
+      DateTimeFormatter: DateTimeFormatter
     }));
   }]);
 });

@@ -13,14 +13,14 @@ if (env === 'production') {
   exportObj = {
     entry: './src/index.js',
     output: {
-      filename: 'date-range-chooser.min.js',
+      filename: 'expander-collapser.min.js',
       path: './dist'
     },
     module: {
       loaders: [{
         test: /\.js$/,
         loader: 'eslint-loader',
-        exclude: /node_modules|fc-calendar-es5.js|src/
+        exclude: /node_modules|src/
       }]
     },
     eslint: {
@@ -40,14 +40,14 @@ if (env === 'production') {
   exportObj = {
     entry: './src/index.js',
     output: {
-      filename: 'date-range-chooser.js',
+      filename: 'expander-collapser.js',
       path: './dist'
     },
     module: {
       loaders: [{
         test: /\.js$/,
         loader: 'eslint-loader',
-        exclude: /node_modules|fc-calendar-es5.js|src/
+        exclude: /node_modules|src/
       }]
     },
     eslint: {

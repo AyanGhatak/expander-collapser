@@ -12,7 +12,7 @@ if (env === 'production') {
   exportObj = {
     entry: './src/index.js',
     output: {
-      filename: 'date-range-chooser-es5.min.js',
+      filename: 'expander-collapser-es5.min.js',
       path: './dist'
     },
     module: {
@@ -45,7 +45,7 @@ if (env === 'production') {
   exportObj = {
     entry: './src/index.js',
     output: {
-      filename: 'date-range-chooser-es5.js',
+      filename: 'expander-collapser-es5.js',
       path: './dist'
     },
     module: {
