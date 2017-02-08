@@ -1,7 +1,7 @@
 {
-  "name": "date-range-chooser-ext",
+  "name": "expander-collapser-ext",
   "version": "1.0.0-alpha",
-  "description": "A date range chooser for FusionCharts Time Series Charts",
+  "description": "An expander-collapser for FusionCharts Time Series Charts",
   "main": "index.js",
   "scripts": {
     "build": "npm run build-es6 && npm run build-es5 && npm run docs && npm test",
@@ -29,12 +29,12 @@
     "series",
     "fc-date-range-chooser"
   ],
-  "author": "Nakshatra Mukhopadhyay",
+  "author": "Ayan Ghatak, Ranajit Banerjee, Nakshatra Mukhopadhyay",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/fusioncharts/date-range-chooser-ext/issues"
+    "url": "https://github.com/ayanghatak/expander-collapser/issues"
   },
-  "homepage": "https://github.com/fusioncharts/date-range-chooser-ext#readme",
+  "homepage": "https://github.com/ayanghatak/expander-collapser#readme",
   "devDependencies": {
     "babel-core": "^6.18.2",
     "babel-loader": "^6.2.8",
