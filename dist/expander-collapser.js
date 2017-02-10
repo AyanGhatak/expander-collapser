@@ -78,10 +78,9 @@
 	'use strict';
 	module.exports = function (dep) {
 	  /**
-	   * Class representing the DateRange.
+	   * Class representing the DateRange
 	   */
 	  class DateRange {
-
 	    constructor() {
 	      /**
 	      * @private
@@ -127,47 +126,45 @@
 	      }
 	    }
 
-	    createD3Buttons (store) {
+	    createD3Button (buttonConf) {
 	      var key,
-	        inputButton,
 	        text,
 	        config,
 	        states,
 	        state,
 	        btn,
+	        button,
 	        styles = this.extData.button,
 	        paper = this.graphics.paper,
 	        d3 = paper.getInstances().d3,
 	        self = this;
 
-	      for (key in store) {
-	        inputButton = store[key];
-	        text = inputButton.text;
-	        config = inputButton.config;
-	        if (!self.btns[key]) { self.btns[key] = {}; }
-	        btn = self.btns[key].btn = d3.button(text).setConfig(config);
-	        btn.namespace('fusioncharts');
-	        btn.appendSelector('standarperiodselector');
-	        self.addCssRules(btn.getIndividualClassNames(btn.getClassName()), styles);
-	        states = styles.states;
-	        for (state in states) {
-	          self.addCssRules(btn.getIndividualClassNames(btn.config.states[state]), styles.states[state]);
-	        }
+	      text = buttonConf.text;
+	      config = buttonConf.config;
 
-	        inputButton.eventListeners && btn.attachEventHandlers({
-	          click: inputButton.eventListeners.click.bind(btn)
-	        });
-	        inputButton.group.addSymbol(btn);
+	      button = d3.button(text).setConfig(config);
+	      button.namespace('fusioncharts');
+	      button.appendSelector('standarperiodselector');
+	      self.addCssRules(button.getIndividualClassNames(button.getClassName()), styles);
+	      states = styles.states;
+	      for (state in states) {
+	        self.addCssRules(button.getIndividualClassNames(button.config.states[state]), styles.states[state]);
 	      }
+
+	      buttonConf.eventListeners && button.attachEventHandlers({
+	        click: buttonConf.eventListeners.click.bind(button)
+	      });
+	      return button;
 	    };
 
-	    createD3Labels (store) {
+	    createD3Label (label) {
 	      var key,
-	        label,
 	        text,
 	        config,
+	        instance,
 	        styles = this.extData.label,
 	        self = this,
+	        button,
 	        dependencies = {
 	          paper: self.graphics.paper,
 	          chart: self.chart,
@@ -175,16 +172,13 @@
 	          chartContainer: self.graphics.container
 	        };
 
-	      for (key in store) {
-	        label = store[key];
-	        text = label.text;
-	        config = label.config;
-	        self[key] = new self.toolbox.Label(text, dependencies, config);
-	        // self[key].namespace('fusioncharts');
-	        // self[key].appendSelector('daterange');
-	        self.addCssRules(self[key].getIndividualClassNames(self[key].getClassName()), styles);
-	        label.group.addSymbol(self[key]);
-	      }
+	      text = label.text;
+	      config = label.config;
+	      instance = new self.toolbox.Label(text, dependencies, config);
+	      // self[key].namespace('fusioncharts');
+	      // self[key].appendSelector('daterange');
+	      self.addCssRules(instance.getIndividualClassNames(instance.getClassName()), styles);
+	      return instance;
 	    };
 
 	    /**
@@ -285,7 +279,6 @@
 	          }
 	        },
 	        label: {
-	          height: 22,
 	          className: 'standard-period-selector-label',
 	          text: {
 	            style: {
@@ -294,6 +287,9 @@
 	              'font-size': '13px',
 	              'fill': '#4b4b4b'
 	            }
+	          },
+	          container: {
+	            height: 22
 	          }
 	        }
 	      };
@@ -301,8 +297,7 @@
 	      instance.config = instance.extData;
 	      Object.assign(instance.extData, instance.extDataUser);
 	      instance.measurement = {};
-	      (instance.toolbars = []).push(instance.createToolbar());
-
+	      instance.toolbar = instance.createToolbar();
 	      return instance;
 	    };
 
@@ -323,61 +318,59 @@
 	        obj = {
 	          fill: '#fff',
 	          borderThickness: 0
-	        };
+	        },
+	        button;
 
 	      // initiating the toolbar
 	      toolbar = new self.HorizontalToolbar(dependencies);
 	      toolbar.setConfig(obj);
 
 	      // making group for the extension label
-	      group = new self.toolbox.ComponentGroup(dependencies);
+	      group = this.group = new self.toolbox.ComponentGroup(dependencies);
 
-	      // making buttonGroup for the buttons
-	      buttonGroup = new self.toolbox.UniSelectComponentGroup(dependencies);
-
-	      buttonGroup.defineStateIndicator(function (symbol) {
-	        var bBox = symbol.getBBox(),
-	          x1 = bBox.x,
-	          x2 = x1 + bBox.width,
-	          y2 = bBox.y + bBox.height;
-	        return {
-	          type: 'path',
-	          attrs: {
-	            d: ['M', x1 + 1, y2 - 1.2, 'L', x2, y2 - 1.2].join(' '),
-	            'stroke-width': 2,
-	            stroke: '#c95a5a'
-	          }
-	        };
-	      });
-
-	      // making buttonGroup for the buttons
-	      buttonGroup.setConfig(obj);
 	      group.setConfig(obj);
 
 	      // extension label
 	      label = {
-	        'ZOOM': {
-	          text: 'Zoom:',
-	          group: group
-	        }
-	      };
-	      self.createD3Labels(label);
-
-	      // 'ALL' button created
-	      allButton = {
-	        fn: function () {
-
+	        height: 22,
+	        text: 'Zoom:',
+	        group: group,
+	        config: {
+	          height: 22
 	        }
 	      };
 
 
-	      self.btns = {};
-	      // adding dummyButton
+
+	      self.componentArr = [];
+
+	      self.componentArr.push({
+	        instance: self.createD3Label(label),
+	        priority: 1
+	      });
+	      var obj = {};
+
 	      for (let i = 0; i < 10; i++) {
-	        self.createD3Buttons([{
-	          text: 'ALL',
+	        button = {};
+	        button.instance = self.createD3Button({
+	          text: 'BUTTON' + i,
 	          config: {
-	            toolText: 'ALL',
+	            margin: {
+	              right: 5,
+	              left: 5
+	            }
+	          },
+	          group: group
+	        });
+	        button.id = 'id';
+	        button.priority = 2;
+	        this.componentArr.push(button);
+	      };
+
+	      this.expandButton = {
+	        instance: self.createD3Button({
+	          text: '>>',
+	          config: {
 	            margin: {
 	              right: 2,
 	              left: 2
@@ -385,10 +378,52 @@
 	          },
 	          group: group,
 	          eventListeners: {
-	            'click': allButton.fn
+	            click: function () {
+	              var fullview = self.fullview,
+	                previousWidth = self.previousWidth,
+	                maxSpace = self.maxSpace,
+	                diff = maxSpace.width - previousWidth;
+
+	              self.adjustWidth(diff);
+	              // self.expand = !self.expand;
+	              // if (self.expand) {
+	              //   self.group.addSymbol(self.getDrawableComponentList(800, 300));
+	              // }
+	              // else {
+	              //   self.group.addSymbol(self.getDrawableComponentList(400, 300));
+	              // }
+	              // self.sp.adjustWidth(50);
+	            }
 	          }
-	        }]);
-	      }
+	        })
+	      };
+
+	      this.expandButton.logicalSpace = button.instance.getLogicalSpace();
+	      this.expandButton.priority = 0;
+
+
+	      // self.createD3Buttons({
+	      //   'expander': {
+	      //     text: '>>',
+	      //     config: {
+	      //       margin: {
+	      //         right: 2,
+	      //         left: 2
+	      //       }
+	      //     },
+	      //     group: group,
+	      //     eventListeners: {
+	      //       click: function () {
+	      //         self.expand = !self.expand;
+	      //         for (var key in self.btns) {
+	      //           obj = self.btns[key];
+	      //           /button/.test(key) && (self.expand ? obj.btn.hide() : obj.btn.show());
+	      //         }
+	      //         self.toolbar.redraw();
+	      //       }
+	      //     }
+	      //   }
+	      // });
 
 	      // adding group and button group to toolbar
 	      toolbar.addComponent(group);
@@ -412,17 +447,44 @@
 	      }
 	    };
 
+	    addSymbols (symbolArr) {
+	      var i, len,
+	        group = this.group;
+
+	      for (i = 0, len = symbolArr.length; i < len; i++) {
+	        group.addSymbol(symbolArr[i].instance);
+	      }
+	    };
+
 	    getLogicalSpace (availableWidth, availableHeight) {
-	      var logicalSpace = this.toolbars[0].getLogicalSpace(availableWidth, availableHeight);
-	      this.toolbars[0].width = logicalSpace.width;
-	      this.toolbars[0].height = logicalSpace.height;
-	      console.log({
-	        width: logicalSpace.width,
-	        height: logicalSpace.height + this.config.padding
-	      });
+	      var buttons = this.buttons,
+	        minArr = [this.expandButton],
+	        minSpace,
+	        maxSpace;
+
+	      this.addSymbols(minArr);
+	      minSpace = this.toolbar.getLogicalSpace(availableWidth, availableHeight);
+
+	      console.log(minSpace);
+	      this.group.emptyList();
+
+	      this.addSymbols(this.componentArr);
+
+	      maxSpace = this.toolbar.getLogicalSpace(availableWidth, availableHeight);
+	      self.maxSpace =  maxSpace;
+	      this.group.emptyList();
+
+	      console.log(maxSpace);
+
 	      return {
-	        width: logicalSpace.width,
-	        height: logicalSpace.height + this.config.padding
+	        width: {
+	          max: maxSpace.width,
+	          min: minSpace.width
+	        },
+	        height: {
+	          max: maxSpace.height,
+	          min: minSpace.height
+	        }
 	      };
 	    };
 
@@ -467,7 +529,6 @@
 	    };
 
 	    setDrawingConfiguration (x, y, width, height, group) {
-	      console.log(x, y, width, height)
 	      var mes = this.measurement;
 	      mes.x = x;
 	      mes.y = y;
@@ -479,14 +540,42 @@
 	      return this;
 	    };
 
+	    getDrawableComponentList (width, height) {
+	      var componentArr = this.componentArr,
+	        totalWidth = 0,
+	        len,
+	        component,
+	        arr = [],
+	        i,
+	        logicalSpace;
+
+	      for (i = 0, len = componentArr.length; i < len; i++) {
+	        component = componentArr[i];
+	        logicalSpace = component.instance.getLogicalSpace();
+	        totalWidth += logicalSpace.width;
+	        if (totalWidth > width) {
+	          break;
+	        }
+	        arr.push(component.instance);
+	      }
+
+	      if (arr.length !== len) {
+	        arr.push(this.expandButton.instance);
+	        self.fullview = false;
+	      }
+	      else {
+	        self.fullview = true;
+	      }
+
+	      self.previousWidth = totalWidth;
+	      return arr;
+	    }
+
 	    draw (x, y, width, height, group) {
 	      let self = this,
 	        measurement = self.measurement,
-	        toolbars = self.toolbars,
-	        ln,
-	        i,
-	        toolbar,
-	        model = self.globalReactiveModel;
+	        toolbar = self.toolbar,
+	        list;
 
 	      x = x === undefined ? measurement.x : x;
 	      y = y === undefined ? measurement.y : y;
@@ -494,10 +583,11 @@
 	      height = height === undefined ? measurement.height : height;
 	      group = group === undefined ? self.parentGroup : group;
 	      if (width && height) {
-	        for (i = 0, ln = toolbars.length; i < ln; i++) {
-	          toolbar = toolbars[i];
-	          toolbar.draw(x, y, group);
-	        }
+	        this.group.emptyList();
+	        list = this.getDrawableComponentList(width, height);
+	        this.group.addSymbol(list);
+	        toolbar.getLogicalSpace(width, height);
+	        toolbar.draw(x, y, group);
 	      }
 	    };
 	  }

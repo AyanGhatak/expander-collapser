@@ -101,7 +101,7 @@
 
 	module.exports = function (dep) {
 	  /**
-	   * Class representing the DateRange.
+	   * Class representing the DateRange
 	   */
 	  var DateRange = function () {
 	    function DateRange() {
@@ -154,51 +154,47 @@
 	        }
 	      }
 	    }, {
-	      key: 'createD3Buttons',
-	      value: function createD3Buttons(store) {
+	      key: 'createD3Button',
+	      value: function createD3Button(buttonConf) {
 	        var key,
-	            inputButton,
 	            text,
 	            config,
 	            states,
 	            state,
 	            btn,
+	            button,
 	            styles = this.extData.button,
 	            paper = this.graphics.paper,
 	            d3 = paper.getInstances().d3,
 	            self = this;
 
-	        for (key in store) {
-	          inputButton = store[key];
-	          text = inputButton.text;
-	          config = inputButton.config;
-	          if (!self.btns[key]) {
-	            self.btns[key] = {};
-	          }
-	          btn = self.btns[key].btn = d3.button(text).setConfig(config);
-	          btn.namespace('fusioncharts');
-	          btn.appendSelector('standarperiodselector');
-	          self.addCssRules(btn.getIndividualClassNames(btn.getClassName()), styles);
-	          states = styles.states;
-	          for (state in states) {
-	            self.addCssRules(btn.getIndividualClassNames(btn.config.states[state]), styles.states[state]);
-	          }
+	        text = buttonConf.text;
+	        config = buttonConf.config;
 
-	          inputButton.eventListeners && btn.attachEventHandlers({
-	            click: inputButton.eventListeners.click.bind(btn)
-	          });
-	          inputButton.group.addSymbol(btn);
+	        button = d3.button(text).setConfig(config);
+	        button.namespace('fusioncharts');
+	        button.appendSelector('standarperiodselector');
+	        self.addCssRules(button.getIndividualClassNames(button.getClassName()), styles);
+	        states = styles.states;
+	        for (state in states) {
+	          self.addCssRules(button.getIndividualClassNames(button.config.states[state]), styles.states[state]);
 	        }
+
+	        buttonConf.eventListeners && button.attachEventHandlers({
+	          click: buttonConf.eventListeners.click.bind(button)
+	        });
+	        return button;
 	      }
 	    }, {
-	      key: 'createD3Labels',
-	      value: function createD3Labels(store) {
+	      key: 'createD3Label',
+	      value: function createD3Label(label) {
 	        var key,
-	            label,
 	            text,
 	            config,
+	            instance,
 	            styles = this.extData.label,
 	            self = this,
+	            button,
 	            dependencies = {
 	          paper: self.graphics.paper,
 	          chart: self.chart,
@@ -206,16 +202,13 @@
 	          chartContainer: self.graphics.container
 	        };
 
-	        for (key in store) {
-	          label = store[key];
-	          text = label.text;
-	          config = label.config;
-	          self[key] = new self.toolbox.Label(text, dependencies, config);
-	          // self[key].namespace('fusioncharts');
-	          // self[key].appendSelector('daterange');
-	          self.addCssRules(self[key].getIndividualClassNames(self[key].getClassName()), styles);
-	          label.group.addSymbol(self[key]);
-	        }
+	        text = label.text;
+	        config = label.config;
+	        instance = new self.toolbox.Label(text, dependencies, config);
+	        // self[key].namespace('fusioncharts');
+	        // self[key].appendSelector('daterange');
+	        self.addCssRules(instance.getIndividualClassNames(instance.getClassName()), styles);
+	        return instance;
 	      }
 	    }, {
 	      key: 'init',
@@ -297,7 +290,6 @@
 	            }
 	          },
 	          label: {
-	            height: 22,
 	            className: 'standard-period-selector-label',
 	            text: {
 	              style: {
@@ -306,6 +298,9 @@
 	                'font-size': '13px',
 	                'fill': '#4b4b4b'
 	              }
+	            },
+	            container: {
+	              height: 22
 	            }
 	          }
 	        };
@@ -313,8 +308,7 @@
 	        instance.config = instance.extData;
 	        Object.assign(instance.extData, instance.extDataUser);
 	        instance.measurement = {};
-	        (instance.toolbars = []).push(instance.createToolbar());
-
+	        instance.toolbar = instance.createToolbar();
 	        return instance;
 	      }
 	    }, {
@@ -338,58 +332,57 @@
 	            obj = {
 	          fill: '#fff',
 	          borderThickness: 0
-	        };
+	        },
+	            button;
 
 	        // initiating the toolbar
 	        toolbar = new self.HorizontalToolbar(dependencies);
 	        toolbar.setConfig(obj);
 
 	        // making group for the extension label
-	        group = new self.toolbox.ComponentGroup(dependencies);
+	        group = this.group = new self.toolbox.ComponentGroup(dependencies);
 
-	        // making buttonGroup for the buttons
-	        buttonGroup = new self.toolbox.UniSelectComponentGroup(dependencies);
-
-	        buttonGroup.defineStateIndicator(function (symbol) {
-	          var bBox = symbol.getBBox(),
-	              x1 = bBox.x,
-	              x2 = x1 + bBox.width,
-	              y2 = bBox.y + bBox.height;
-	          return {
-	            type: 'path',
-	            attrs: {
-	              d: ['M', x1 + 1, y2 - 1.2, 'L', x2, y2 - 1.2].join(' '),
-	              'stroke-width': 2,
-	              stroke: '#c95a5a'
-	            }
-	          };
-	        });
-
-	        // making buttonGroup for the buttons
-	        buttonGroup.setConfig(obj);
 	        group.setConfig(obj);
 
 	        // extension label
 	        label = {
-	          'ZOOM': {
-	            text: 'Zoom:',
-	            group: group
+	          height: 22,
+	          text: 'Zoom:',
+	          group: group,
+	          config: {
+	            height: 22
 	          }
 	        };
-	        self.createD3Labels(label);
 
-	        // 'ALL' button created
-	        allButton = {
-	          fn: function fn() {}
+	        self.componentArr = [];
+
+	        self.componentArr.push({
+	          instance: self.createD3Label(label),
+	          priority: 1
+	        });
+	        var obj = {};
+
+	        for (var i = 0; i < 10; i++) {
+	          button = {};
+	          button.instance = self.createD3Button({
+	            text: 'BUTTON' + i,
+	            config: {
+	              margin: {
+	                right: 5,
+	                left: 5
+	              }
+	            },
+	            group: group
+	          });
+	          button.id = 'id';
+	          button.priority = 2;
+	          this.componentArr.push(button);
 	        };
 
-	        self.btns = {};
-	        // adding dummyButton
-	        for (var i = 0; i < 10; i++) {
-	          self.createD3Buttons([{
-	            text: 'ALL',
+	        this.expandButton = {
+	          instance: self.createD3Button({
+	            text: '>>',
 	            config: {
-	              toolText: 'ALL',
 	              margin: {
 	                right: 2,
 	                left: 2
@@ -397,10 +390,51 @@
 	            },
 	            group: group,
 	            eventListeners: {
-	              'click': allButton.fn
+	              click: function click() {
+	                var fullview = self.fullview,
+	                    previousWidth = self.previousWidth,
+	                    maxSpace = self.maxSpace,
+	                    diff = maxSpace.width - previousWidth;
+
+	                self.adjustWidth(diff);
+	                // self.expand = !self.expand;
+	                // if (self.expand) {
+	                //   self.group.addSymbol(self.getDrawableComponentList(800, 300));
+	                // }
+	                // else {
+	                //   self.group.addSymbol(self.getDrawableComponentList(400, 300));
+	                // }
+	                // self.sp.adjustWidth(50);
+	              }
 	            }
-	          }]);
-	        }
+	          })
+	        };
+
+	        this.expandButton.logicalSpace = button.instance.getLogicalSpace();
+	        this.expandButton.priority = 0;
+
+	        // self.createD3Buttons({
+	        //   'expander': {
+	        //     text: '>>',
+	        //     config: {
+	        //       margin: {
+	        //         right: 2,
+	        //         left: 2
+	        //       }
+	        //     },
+	        //     group: group,
+	        //     eventListeners: {
+	        //       click: function () {
+	        //         self.expand = !self.expand;
+	        //         for (var key in self.btns) {
+	        //           obj = self.btns[key];
+	        //           /button/.test(key) && (self.expand ? obj.btn.hide() : obj.btn.show());
+	        //         }
+	        //         self.toolbar.redraw();
+	        //       }
+	        //     }
+	        //   }
+	        // });
 
 	        // adding group and button group to toolbar
 	        toolbar.addComponent(group);
@@ -425,55 +459,94 @@
 	        }
 	      }
 	    }, {
+	      key: 'addSymbols',
+	      value: function addSymbols(symbolArr) {
+	        var i,
+	            len,
+	            group = this.group;
+
+	        for (i = 0, len = symbolArr.length; i < len; i++) {
+	          group.addSymbol(symbolArr[i].instance);
+	        }
+	      }
+	    }, {
 	      key: 'getLogicalSpace',
 	      value: function getLogicalSpace(availableWidth, availableHeight) {
-	        var logicalSpace = this.toolbars[0].getLogicalSpace(availableWidth, availableHeight);
-	        this.toolbars[0].width = logicalSpace.width;
-	        this.toolbars[0].height = logicalSpace.height;
-	        console.log({
-	          width: logicalSpace.width,
-	          height: logicalSpace.height + this.config.padding
-	        });
+	        var buttons = this.buttons,
+	            minArr = [this.expandButton],
+	            minSpace,
+	            maxSpace;
+
+	        this.addSymbols(minArr);
+	        minSpace = this.toolbar.getLogicalSpace(availableWidth, availableHeight);
+
+	        console.log(minSpace);
+	        this.group.emptyList();
+
+	        this.addSymbols(this.componentArr);
+
+	        maxSpace = this.toolbar.getLogicalSpace(availableWidth, availableHeight);
+	        self.maxSpace = maxSpace;
+	        this.group.emptyList();
+
+	        console.log(maxSpace);
+
 	        return {
-	          width: logicalSpace.width,
-	          height: logicalSpace.height + this.config.padding
+	          width: {
+	            max: maxSpace.width,
+	            min: minSpace.width
+	          },
+	          height: {
+	            max: maxSpace.height,
+	            min: minSpace.height
+	          }
 	        };
 	      }
 	    }, {
 	      key: 'placeInCanvas',
 	      value: function placeInCanvas() {
-	        var _self = this;
-	        _self.spaceManagerInstance.add([{
+	        var self = this;
+	        self.spaceManagerInstance.add([{
 	          name: function name() {
 	            return 'ExpanderCollapser';
 	          },
 	          ref: function ref(obj) {
 	            return obj['0'];
 	          },
-	          self: function self() {
-	            return _self;
-	          },
+	          self: function (_self) {
+	            function self() {
+	              return _self.apply(this, arguments);
+	            }
+
+	            self.toString = function () {
+	              return _self.toString();
+	            };
+
+	            return self;
+	          }(function () {
+	            return self;
+	          }),
 	          priority: function priority() {
 	            return 2;
 	          },
 	          layout: function layout(obj) {
-	            return obj[_self.config.layout];
+	            return obj[self.config.layout];
 	          },
 	          orientation: [{
 	            type: function type(obj) {
-	              return obj[_self.config.orientation];
+	              return obj[self.config.orientation];
 	            },
 	            position: [{
 	              type: function type(obj) {
-	                return obj[_self.config.position];
+	                return obj[self.config.position];
 	              },
 	              alignment: [{
 	                type: function type(obj) {
-	                  return obj[_self.config.alignment];
+	                  return obj[self.config.alignment];
 	                },
 	                dimensions: [function () {
 	                  var parent = this.getParentComponentGroup();
-	                  return _self.getLogicalSpace(parent.getWidth(), parent.getHeight());
+	                  return self.getLogicalSpace(parent.getWidth(), parent.getHeight());
 	                }]
 	              }]
 	            }]
@@ -483,7 +556,6 @@
 	    }, {
 	      key: 'setDrawingConfiguration',
 	      value: function setDrawingConfiguration(x, y, width, height, group) {
-	        console.log(x, y, width, height);
 	        var mes = this.measurement;
 	        mes.x = x;
 	        mes.y = y;
@@ -495,15 +567,43 @@
 	        return this;
 	      }
 	    }, {
+	      key: 'getDrawableComponentList',
+	      value: function getDrawableComponentList(width, height) {
+	        var componentArr = this.componentArr,
+	            totalWidth = 0,
+	            len,
+	            component,
+	            arr = [],
+	            i,
+	            logicalSpace;
+
+	        for (i = 0, len = componentArr.length; i < len; i++) {
+	          component = componentArr[i];
+	          logicalSpace = component.instance.getLogicalSpace();
+	          totalWidth += logicalSpace.width;
+	          if (totalWidth > width) {
+	            break;
+	          }
+	          arr.push(component.instance);
+	        }
+
+	        if (arr.length !== len) {
+	          arr.push(this.expandButton.instance);
+	          self.fullview = false;
+	        } else {
+	          self.fullview = true;
+	        }
+
+	        self.previousWidth = totalWidth;
+	        return arr;
+	      }
+	    }, {
 	      key: 'draw',
 	      value: function draw(x, y, width, height, group) {
 	        var self = this,
 	            measurement = self.measurement,
-	            toolbars = self.toolbars,
-	            ln = void 0,
-	            i = void 0,
-	            toolbar = void 0,
-	            model = self.globalReactiveModel;
+	            toolbar = self.toolbar,
+	            list = void 0;
 
 	        x = x === undefined ? measurement.x : x;
 	        y = y === undefined ? measurement.y : y;
@@ -511,10 +611,11 @@
 	        height = height === undefined ? measurement.height : height;
 	        group = group === undefined ? self.parentGroup : group;
 	        if (width && height) {
-	          for (i = 0, ln = toolbars.length; i < ln; i++) {
-	            toolbar = toolbars[i];
-	            toolbar.draw(x, y, group);
-	          }
+	          this.group.emptyList();
+	          list = this.getDrawableComponentList(width, height);
+	          this.group.addSymbol(list);
+	          toolbar.getLogicalSpace(width, height);
+	          toolbar.draw(x, y, group);
 	        }
 	      }
 	    }]);
