@@ -1,5 +1,6 @@
 'use strict';
 const DateRange = require('./fcts-ext-expandercollapser');
+const SidePanel = require('./fcts-ext-sidepanel.js');
 ;(function (env, factory) {
   if (typeof module === 'object' && module.exports) {
     module.exports = env.document
@@ -25,5 +26,18 @@ const DateRange = require('./fcts-ext-expandercollapser');
       FusionCharts: FC,
       DateTimeFormatter: DateTimeFormatter
     }));
+
+    FC.registerComponent('extensions', 'SidePanel', SidePanel({
+      FusionCharts: FC,
+      DateTimeFormatter: DateTimeFormatter
+    }));
+    // FC.registerComponent('extensions', 'expander-collapser3', DateRange({
+    //   FusionCharts: FC,
+    //   DateTimeFormatter: DateTimeFormatter
+    // }));
+    // FC.registerComponent('extensions', 'expander-collapser4', DateRange({
+    //   FusionCharts: FC,
+    //   DateTimeFormatter: DateTimeFormatter
+    // }));
   }]);
 });
