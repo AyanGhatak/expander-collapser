@@ -21,5 +21,9 @@ const DateRange = require('./fcts-ext-expandercollapser');
       FusionCharts: FC,
       DateTimeFormatter: DateTimeFormatter
     }));
+    FC.registerComponent('extensions', 'expander-collapser2', DateRange({
+      FusionCharts: FC,
+      DateTimeFormatter: DateTimeFormatter
+    }));
   }]);
 });

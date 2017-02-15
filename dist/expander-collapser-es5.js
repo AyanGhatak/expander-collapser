@@ -69,6 +69,10 @@
 	      FusionCharts: FC,
 	      DateTimeFormatter: DateTimeFormatter
 	    }));
+	    FC.registerComponent('extensions', 'expander-collapser2', DateRange({
+	      FusionCharts: FC,
+	      DateTimeFormatter: DateTimeFormatter
+	    }));
 	  }]);
 	});
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)(module)))
@@ -317,6 +321,11 @@
 
 	      // creates toolbar
 	      value: function createToolbar() {
+	        if (!window.count) {
+	          window.count = 0;
+	        }
+	        window.count += 1;
+
 	        var self = this,
 	            buttonGroup,
 	            toolbar,
@@ -360,9 +369,10 @@
 	          instance: self.createD3Label(label),
 	          priority: 1
 	        });
-	        var obj = {};
+	        var obj = {},
+	            name = self.getModuleName();
 
-	        for (var i = 0; i < 10; i++) {
+	        for (var i = 0; i < 6; i++) {
 	          button = {};
 	          button.instance = self.createD3Button({
 	            text: 'BUTTON' + i,
@@ -395,16 +405,7 @@
 	                    previousWidth = self.previousWidth,
 	                    maxSpace = self.maxSpace,
 	                    diff = maxSpace.width - previousWidth;
-
-	                self.adjustWidth(diff);
-	                // self.expand = !self.expand;
-	                // if (self.expand) {
-	                //   self.group.addSymbol(self.getDrawableComponentList(800, 300));
-	                // }
-	                // else {
-	                //   self.group.addSymbol(self.getDrawableComponentList(400, 300));
-	                // }
-	                // self.sp.adjustWidth(50);
+	                self.spaceManagerInstance.cacheByName(name).adjustWidth(diff);
 	              }
 	            }
 	          })
@@ -480,73 +481,61 @@
 	        this.addSymbols(minArr);
 	        minSpace = this.toolbar.getLogicalSpace(availableWidth, availableHeight);
 
-	        console.log(minSpace);
 	        this.group.emptyList();
 
 	        this.addSymbols(this.componentArr);
 
-	        maxSpace = this.toolbar.getLogicalSpace(availableWidth, availableHeight);
-	        self.maxSpace = maxSpace;
+	        this.maxSpace = maxSpace = this.toolbar.getLogicalSpace(availableWidth, availableHeight);
 	        this.group.emptyList();
-
-	        console.log(maxSpace);
 
 	        return {
 	          width: {
 	            max: maxSpace.width,
 	            min: minSpace.width
 	          },
-	          height: {
-	            max: maxSpace.height,
-	            min: minSpace.height
-	          }
+	          height: maxSpace.height
 	        };
+	      }
+	    }, {
+	      key: 'getModuleName',
+	      value: function getModuleName() {
+	        return 'ExpanderCollapser' + window.count;
 	      }
 	    }, {
 	      key: 'placeInCanvas',
 	      value: function placeInCanvas() {
-	        var self = this;
-	        self.spaceManagerInstance.add([{
+	        var _self = this;
+	        _self.spaceManagerInstance.add([{
 	          name: function name() {
-	            return 'ExpanderCollapser';
+	            return _self.getModuleName();
 	          },
 	          ref: function ref(obj) {
 	            return obj['0'];
 	          },
-	          self: function (_self) {
-	            function self() {
-	              return _self.apply(this, arguments);
-	            }
-
-	            self.toString = function () {
-	              return _self.toString();
-	            };
-
-	            return self;
-	          }(function () {
-	            return self;
-	          }),
+	          self: function self() {
+	            return _self;
+	          },
 	          priority: function priority() {
 	            return 2;
 	          },
 	          layout: function layout(obj) {
-	            return obj[self.config.layout];
+	            return obj[_self.config.layout];
 	          },
 	          orientation: [{
 	            type: function type(obj) {
-	              return obj[self.config.orientation];
+	              return obj[_self.config.orientation];
 	            },
 	            position: [{
 	              type: function type(obj) {
-	                return obj[self.config.position];
+	                return obj[_self.config.position];
 	              },
 	              alignment: [{
 	                type: function type(obj) {
-	                  return obj[self.config.alignment];
+	                  return obj[_self.config.alignment];
 	                },
 	                dimensions: [function () {
 	                  var parent = this.getParentComponentGroup();
-	                  return self.getLogicalSpace(parent.getWidth(), parent.getHeight());
+	                  return _self.getLogicalSpace(parent.getWidth(), parent.getHeight());
 	                }]
 	              }]
 	            }]
@@ -589,12 +578,9 @@
 
 	        if (arr.length !== len) {
 	          arr.push(this.expandButton.instance);
-	          self.fullview = false;
-	        } else {
-	          self.fullview = true;
 	        }
 
-	        self.previousWidth = totalWidth;
+	        this.previousWidth = totalWidth;
 	        return arr;
 	      }
 	    }, {

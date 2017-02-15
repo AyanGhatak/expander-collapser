@@ -67,6 +67,10 @@
 	      FusionCharts: FC,
 	      DateTimeFormatter: DateTimeFormatter
 	    }));
+	    FC.registerComponent('extensions', 'expander-collapser2', DateRange({
+	      FusionCharts: FC,
+	      DateTimeFormatter: DateTimeFormatter
+	    }));
 	  }]);
 	});
 
@@ -303,6 +307,11 @@
 
 	    // creates toolbar
 	    createToolbar () {
+	      if (!window.count) {
+	        window.count = 0;
+	      }
+	      window.count += 1;
+
 	      var self = this,
 	        buttonGroup,
 	        toolbar,
@@ -348,9 +357,10 @@
 	        instance: self.createD3Label(label),
 	        priority: 1
 	      });
-	      var obj = {};
+	      var obj = {},
+	        name = self.getModuleName();
 
-	      for (let i = 0; i < 10; i++) {
+	      for (let i = 0; i < 6; i++) {
 	        button = {};
 	        button.instance = self.createD3Button({
 	          text: 'BUTTON' + i,
@@ -383,16 +393,7 @@
 	                previousWidth = self.previousWidth,
 	                maxSpace = self.maxSpace,
 	                diff = maxSpace.width - previousWidth;
-
-	              self.adjustWidth(diff);
-	              // self.expand = !self.expand;
-	              // if (self.expand) {
-	              //   self.group.addSymbol(self.getDrawableComponentList(800, 300));
-	              // }
-	              // else {
-	              //   self.group.addSymbol(self.getDrawableComponentList(400, 300));
-	              // }
-	              // self.sp.adjustWidth(50);
+	              self.spaceManagerInstance.cacheByName(name).adjustWidth(diff);
 	            }
 	          }
 	        })
@@ -465,34 +466,31 @@
 	      this.addSymbols(minArr);
 	      minSpace = this.toolbar.getLogicalSpace(availableWidth, availableHeight);
 
-	      console.log(minSpace);
 	      this.group.emptyList();
 
 	      this.addSymbols(this.componentArr);
 
-	      maxSpace = this.toolbar.getLogicalSpace(availableWidth, availableHeight);
-	      self.maxSpace =  maxSpace;
+	      this.maxSpace = maxSpace = this.toolbar.getLogicalSpace(availableWidth, availableHeight);
 	      this.group.emptyList();
-
-	      console.log(maxSpace);
 
 	      return {
 	        width: {
 	          max: maxSpace.width,
 	          min: minSpace.width
 	        },
-	        height: {
-	          max: maxSpace.height,
-	          min: minSpace.height
-	        }
+	        height: maxSpace.height
 	      };
 	    };
+
+	    getModuleName () {
+	      return 'ExpanderCollapser' + window.count;
+	    }
 
 	    placeInCanvas () {
 	      var self = this;
 	      self.spaceManagerInstance.add([{
 	        name: function () {
-	          return 'ExpanderCollapser';
+	          return self.getModuleName();
 	        },
 	        ref: function (obj) {
 	          return obj['0'];
@@ -561,13 +559,9 @@
 
 	      if (arr.length !== len) {
 	        arr.push(this.expandButton.instance);
-	        self.fullview = false;
-	      }
-	      else {
-	        self.fullview = true;
 	      }
 
-	      self.previousWidth = totalWidth;
+	      this.previousWidth = totalWidth;
 	      return arr;
 	    }
 
