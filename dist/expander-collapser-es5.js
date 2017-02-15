@@ -405,6 +405,7 @@
 	                    previousWidth = self.previousWidth,
 	                    maxSpace = self.maxSpace,
 	                    diff = maxSpace.width - previousWidth;
+	                console.log('diff', diff);
 	                self.spaceManagerInstance.cacheByName(name).adjustWidth(diff);
 	              }
 	            }
@@ -478,15 +479,15 @@
 	            minSpace,
 	            maxSpace;
 
+	        this.group.emptyList();
 	        this.addSymbols(minArr);
 	        minSpace = this.toolbar.getLogicalSpace(availableWidth, availableHeight);
-
+	        console.log('minWidth', minSpace.width);
 	        this.group.emptyList();
 
 	        this.addSymbols(this.componentArr);
 
 	        this.maxSpace = maxSpace = this.toolbar.getLogicalSpace(availableWidth, availableHeight);
-	        this.group.emptyList();
 
 	        return {
 	          width: {
@@ -564,23 +565,41 @@
 	            component,
 	            arr = [],
 	            i,
-	            logicalSpace;
+	            logicalSpace,
+	            group = this.group,
+	            toolbar = this.toolbar,
+	            padding = group.config.padding,
+	            margin = group.config.margin,
+	            tPad = toolbar.config.padding,
+	            btn,
+	            hSpace = tPad.left + tPad.right + padding.left + padding.right + margin.left + margin.right;
+
+	        width -= hSpace;
 
 	        for (i = 0, len = componentArr.length; i < len; i++) {
 	          component = componentArr[i];
 	          logicalSpace = component.instance.getLogicalSpace();
+	          this.previousWidth = totalWidth;
 	          totalWidth += logicalSpace.width;
 	          if (totalWidth > width) {
+	            totalWidth -= logicalSpace.width;
 	            break;
 	          }
 	          arr.push(component.instance);
 	        }
 
+	        logicalSpace = this.expandButton.instance.getLogicalSpace();
+
 	        if (arr.length !== len) {
+	          totalWidth += logicalSpace.width;
+	          if (totalWidth > width) {
+	            btn = arr.pop();
+	            totalWidth -= btn.getLogicalSpace().width;
+	          }
 	          arr.push(this.expandButton.instance);
 	        }
 
-	        this.previousWidth = totalWidth;
+	        this.previousWidth = totalWidth + hSpace;
 	        return arr;
 	      }
 	    }, {
