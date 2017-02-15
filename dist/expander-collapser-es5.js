@@ -1040,8 +1040,8 @@
 	      key: 'getSidePanelSpace',
 	      value: function getSidePanelSpace(availableWidth, availableHeight) {
 	        return {
-	          width: this.showKPI ? 40 : 0,
-	          height: this.showKPI ? 100 : 0
+	          width: this.showKPI ? 100 : 0,
+	          height: this.showKPI ? 1 : 0
 	        };
 	      }
 	    }, {
@@ -1104,7 +1104,6 @@
 	            return 2;
 	          },
 	          layout: function layout(obj) {
-	            debugger;
 	            return obj.block;
 	          },
 	          orientation: [{
@@ -1156,7 +1155,97 @@
 	        group = group === undefined ? self.parentGroup : group;
 	        if (width && height) {
 	          toolbar.draw(x, y, group);
+	          this.showKPI ? this.drawPanel(x + width, y) : this.hidePanel();
 	        }
+	      }
+	    }, {
+	      key: 'drawPanel',
+	      value: function drawPanel(x, y) {
+	        var childStyle = {
+	          left: '10px',
+	          'font-weight': 'normal',
+	          padding: '2px'
+	        },
+	            headStyleObj = {
+	          padding: '10px',
+	          'font-weight': 'bold'
+	        };
+	        var data = [{
+	          head: {
+	            text: ['Visible Data'],
+	            style: headStyleObj
+	          },
+	          style: {
+	            margin: '5px'
+	          },
+	          children: [{
+	            text: ['Maximum', 30],
+	            style: childStyle
+	          }, {
+	            text: ['Minimum', 30],
+	            style: childStyle
+	          }, {
+	            text: ['Standard Deviation', 30],
+	            style: childStyle
+	          }, {
+	            text: ['Average', 30],
+	            style: childStyle
+	          }]
+	        }, {
+	          head: {
+	            text: ['Full Data'],
+	            style: headStyleObj
+	          },
+	          style: {
+	            margin: '5px'
+	          },
+	          children: [{
+	            text: ['Maximum', 30],
+	            style: childStyle
+	          }, {
+	            text: ['Minimum', 30],
+	            style: childStyle
+	          }, {
+	            text: ['Standard Deviation', 30],
+	            style: childStyle
+	          }, {
+	            text: ['Average', 30],
+	            style: childStyle
+	          }]
+	        }];
+
+	        var parent,
+	            selection = d3.select(this.graphics.container).selectAll('.test').data([1]);
+
+	        selection = selection.enter().append('div').merge(selection).attr('class', 'test').style("left", x + "px").style('position', 'absolute').style('display', 'block').style("top", y + "px");
+
+	        function createDIV(text, selection, cls, styleObj) {
+	          var str = text.join(':'),
+	              child = selection.selectAll('.' + cls).data([1]);
+
+	          child = child.enter().append('div').merge(child).attr('class', cls).html(str).style('position', 'relative');
+
+	          for (var obj in styleObj) {
+	            child.style(obj, styleObj[obj]);
+	          }
+
+	          return child;
+	        }
+
+	        for (var i = 0, len = data.length; i < len; i += 1) {
+	          createDIV([], selection, data[i].head.text[0] + '_container', data[i].style);
+	          parent = createDIV(data[i].head.text, selection, data[i].head.text[0], data[i].head.style);
+	          if (data[i].children) {
+	            for (var j = 0, len1 = data[i].children.length; j < len1; j += 1) {
+	              createDIV(data[i].children[j].text, parent, data[i].text + '_' + data[i].children[j].text[0], data[i].children[j].style);
+	            }
+	          }
+	        }
+	      }
+	    }, {
+	      key: 'hidePanel',
+	      value: function hidePanel() {
+	        d3.select(this.graphics.container).select('.test').remove();
 	      }
 	    }]);
 
