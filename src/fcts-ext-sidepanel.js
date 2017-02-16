@@ -430,7 +430,7 @@ module.exports = function (dep) {
           }
       }).on('click',function () {
         d3.event.stopPropagation();
-      })
+      }).node().focus();
 
       text.enter().append('span').
         merge(text).html('Set Min').style('position', 'absolute').style('top', (height / 2) + 'px')
@@ -467,16 +467,20 @@ module.exports = function (dep) {
 
             for (i = start; i < end; i++) {
               y = yAxisModel[i];
-              max = Math.max(max, y);
-              min = Math.min(min, y);
-              sum += y;
+              if (y !== undefined) {
+                max = Math.max(max, y);
+                min = Math.min(min, y);
+                sum += y;
+              }
             }
             avg = sum / (end - start);
 
             params.sum = sum;
             for (i = vp.start; i < vp.end; i++) {
               y = yAxisModel[i];
-              arr.push(Math.pow(y - avg, 2));
+              if (y !== undefined) {
+                arr.push(Math.pow(y - avg, 2));
+              }
             }
             sum = 0;
             for (i = 0; i < arr.length; i++) {
