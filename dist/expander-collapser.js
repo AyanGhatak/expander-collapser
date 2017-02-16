@@ -749,6 +749,7 @@
 	        'smartLabel',
 	        'extData',
 	        'chartInstance',
+	        'dataset',
 	        function (
 	              graphics,
 	              chart,
@@ -759,7 +760,8 @@
 	              spaceManagerInstance,
 	              smartLabel,
 	              extData,
-	              chartInstance) {
+	              chartInstance,
+	              dataset) {
 	          instance.graphics = graphics;
 	          instance.chart = chart;
 	          instance.markerManager = markerManager;
@@ -914,7 +916,12 @@
 	              left: 5
 	            }
 	          },
-	          group: group
+	          group: group,
+	          eventListeners: {
+	            click: function () {
+	              self.showPopup();
+	            }
+	          }
 	        }),
 	        id: 'id',
 	        priority: 2
@@ -939,6 +946,9 @@
 	        priority: 2
 	      });
 
+	      d3.select('html').on('click', function () {
+	        self.hidePopup();
+	      });
 	      // self.createD3Buttons({
 	      //   'expander': {
 	      //     text: '>>',
@@ -992,6 +1002,95 @@
 	        group.addSymbol(symbolArr[i].instance);
 	      }
 	    };
+
+	    showPopup () {
+	      var paper = this.graphics.paper,
+	        d3 = paper.getInstances().d3,
+	        self = this,
+	        container = this.graphics.container,
+	        width = container.offsetWidth - (this.showKPI ? 100 : 0),
+	        height = container.offsetHeight,
+	        selection,
+	        input,
+	        text;
+
+	      selection = this.selection;
+	      if (!selection) {
+	        selection = this.selection = d3.select(container).append('div');
+	      }
+	      selection.style('display', 'block');
+	      selection.style('position', 'absolute').style('left', '0px').style('top', '0px')
+	          .style('width', width + 'px').style('height', height + 'px')
+	          .style('background', '#7f7f7f').style('opacity', '0.3');
+	      input = selection.selectAll('input').data([{
+	        text: 'Set Min'
+	      }]);
+	      text = selection.selectAll('span').data([{
+	        text: 'Set Min'
+	      }]);
+	      d3.event.stopPropagation();
+	      input.enter().append('input').
+	        merge(input).style('position', 'absolute').style('top', (height / 2) + 'px')
+	      .style('left', (width / 2) + 'px').on('keypress', function () {
+	        var reactiveModel = self.globalReactiveModel,
+	          inst = self.chartInstance,
+	          store = inst.apiInstance.getComponentStore(),
+	          canvas = store.getCanvasByIndex(0),
+	          comp = canvas.getComposition(),
+	          ds = comp.dataset,
+	          params = {};
+
+	        if (d3.event.keyCode === 13) {
+	          ds.forEachSeries(function (xAxisModel, yAxisModel, vp) {
+	            var i,
+	              y,
+	              max = -Infinity,
+	              min = +Infinity,
+	              sum = 0,
+	              arr = [],
+	              avg,
+	              sd;
+	            for (i = vp.start; i < vp.end; i++) {
+	              y = yAxisModel[i];
+	              max = Math.max(max, y);
+	              min = Math.min(min, y);
+	              sum += y;
+	            }
+	            avg = sum / (vp.end - vp.start);
+
+	            params.sum = sum;
+	            for (i = vp.start; i < vp.end; i++) {
+	              y = yAxisModel[i];
+	              arr.push(Math.pow(y - avg, 2));
+	            }
+	            sum = 0;
+	            for (i = 0; i < arr.length; i++) {
+	              y = arr[i];
+	              sum += y;
+	            }
+
+	            sd = sum / arr.length;
+
+	            params.sd = sd;
+	            params.max = max;
+	            params.min = min;
+	            params.mean = avg;
+	          });
+	          console.log(params);
+	        }
+	      }).on('click',function () {
+	        d3.event.stopPropagation();
+	      })
+
+	      text.enter().append('span').
+	        merge(text).html('Set Min').style('position', 'absolute').style('top', (height / 2) + 'px')
+	      .style('left', (width / 2) - 60 + 'px').style('color', '#000000').style('opacity', 1);
+	      d3.event.stopPropagation();
+	    }
+
+	    hidePopup () {
+	      this.selection && this.selection.style('display', 'none');
+	    }
 
 	    getLogicalSpace (availableWidth, availableHeight) {
 	      var buttons = this.buttons,
